@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Profile</title>
+</head>
+<body>
+    <h1>{{ student.user.username }}'s Profile</h1>
+    <img src="{{ student.photo.url }}" alt="Profile Photo" width="150">
+    <p><strong>Bio:</strong> {{ student.bio }}</p>
+    <p><strong>Group:</strong> {{ student.group }}</p>
+</body>
+</html>
