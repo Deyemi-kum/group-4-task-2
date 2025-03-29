@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+# Task Model
 class Task(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
@@ -11,15 +12,25 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
+# Course Model
+class Course(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.name
+
+# Module Model
 class Module(models.Model):
-    code = models.CharField(max_length=20, unique=True)  # Add a unique code field
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='modules')
+    code = models.CharField(max_length=20, unique=True)  # Unique code for the module
     name = models.CharField(max_length=200)
     description = models.TextField()
     is_open_for_registration = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.course.name})"
 
+# Student Model
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     date_of_birth = models.DateField(null=True, blank=True)
@@ -31,6 +42,7 @@ class Student(models.Model):
     def __str__(self):
         return self.user.username
 
+# Registration Model
 class Registration(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     module = models.ForeignKey(Module, on_delete=models.CASCADE)
@@ -39,6 +51,7 @@ class Registration(models.Model):
     def __str__(self):
         return f"{self.student.user.username} registered for {self.module.name}"
 
+# Signal to Create Student Profile Automatically
 @receiver(post_save, sender=User)
 def create_student_profile(sender, instance, created, **kwargs):
     if created:
