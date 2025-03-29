@@ -48,6 +48,9 @@ class Registration(models.Model):
     module = models.ForeignKey(Module, on_delete=models.CASCADE)
     registered_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('student', 'module')  # Enforce unique registration per module
+
     def __str__(self):
         return f"{self.student.user.username} registered for {self.module.name}"
 
@@ -56,3 +59,12 @@ class Registration(models.Model):
 def create_student_profile(sender, instance, created, **kwargs):
     if created:
         Student.objects.create(user=instance)
+
+# Signal to Automatically Register a Student to a Module
+@receiver(post_save, sender=Module)
+def auto_register_student(sender, instance, created, **kwargs):
+    if created:
+        # Example logic: Automatically register the first student to the module
+        student = Student.objects.first()  # Replace with actual logic
+        if student:
+            Registration.objects.get_or_create(student=student, module=instance)
